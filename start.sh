@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-mkdir -p /run/sshd
-mkdir -p /root/.ssh
+mkdir -p /run/sshd /root/.ssh
 chmod 700 /root/.ssh
-
 ssh-keygen -A
 
 if [ -n "${SSH_PUBLIC_KEY:-}" ]; then
