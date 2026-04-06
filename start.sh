@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
-mkdir -p /root/.ssh
+mkdir -p /run/sshd /root/.ssh
 chmod 700 /root/.ssh
+ssh-keygen -A
 
-if [ -n "${PUBLIC_KEY}" ]; then
-  echo "${PUBLIC_KEY}" >> /root/.ssh/authorized_keys
+# Prefer Runpod's documented override variable
+if [ -n "${SSH_PUBLIC_KEY:-}" ]; then
+  printf '%s\n' "${SSH_PUBLIC_KEY}" > /root/.ssh/authorized_keys
 fi
 
-chmod 600 /root/.ssh/authorized_keys || true
+chmod 600 /root/.ssh/authorized_keys 2>/dev/null || true
 
 mkdir -p /workspace/cache/huggingface
 mkdir -p /workspace/cache/datasets
@@ -18,5 +20,6 @@ mkdir -p /workspace/models
 mkdir -p /workspace/data
 mkdir -p /workspace/ckpt
 
-/usr/sbin/sshd -D &
-sleep infinity
+/usr/sbin/sshd
+
+exec "$@"
