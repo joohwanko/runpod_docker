@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
-mkdir -p /run/sshd /root/.ssh
+mkdir -p /run/sshd
+mkdir -p /root/.ssh
 chmod 700 /root/.ssh
+
 ssh-keygen -A
 
-# Prefer Runpod's documented override variable
 if [ -n "${SSH_PUBLIC_KEY:-}" ]; then
   printf '%s\n' "${SSH_PUBLIC_KEY}" > /root/.ssh/authorized_keys
+elif [ -n "${PUBLIC_KEY:-}" ]; then
+  printf '%s\n' "${PUBLIC_KEY}" > /root/.ssh/authorized_keys
 fi
 
 chmod 600 /root/.ssh/authorized_keys 2>/dev/null || true
