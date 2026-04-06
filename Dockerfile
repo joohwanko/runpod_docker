@@ -13,19 +13,20 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
 # Claude Code
-RUN curl -fsSL https://claude.ai/install.sh | bash
+RUN curl -fsSL https://claude.ai/install.sh | bash || true
 ENV PATH="/root/.local/bin:/root/.claude/local:${PATH}"
 
 # Codex CLI
 RUN npm install -g @openai/codex
 
-# copy project metadata first for caching
+# project install
 COPY pyproject.toml /workspace/pyproject.toml
+RUN uv pip install --system -e /workspace || true
 
-# install python deps from pyproject
-RUN uv pip install --system .
+# useful defaults
+RUN uv pip install --system wandb jupyterlab ipykernel
 
-# default cache paths on volume
+# cache paths on Runpod volume
 ENV HF_HOME=/workspace/cache/huggingface
 ENV TRANSFORMERS_CACHE=/workspace/cache/huggingface
 ENV HF_DATASETS_CACHE=/workspace/cache/datasets
