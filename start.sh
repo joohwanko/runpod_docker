@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export JAX_PLATFORMS="${JAX_PLATFORMS:-cuda}"
+export XLA_PYTHON_CLIENT_PREALLOCATE="${XLA_PYTHON_CLIENT_PREALLOCATE:-false}"
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+
 mkdir -p /run/sshd /root/.ssh
 chmod 700 /root/.ssh
 ssh-keygen -A >/dev/null 2>&1 || true

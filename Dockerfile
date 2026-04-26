@@ -10,7 +10,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
     TRANSFORMERS_CACHE=/workspace/cache/huggingface \
     HF_DATASETS_CACHE=/workspace/cache/datasets \
     WANDB_DIR=/workspace/wandb \
-    JAX_PLATFORMS=cuda \
     XLA_PYTHON_CLIENT_PREALLOCATE=false \
     PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
     NVIDIA_VISIBLE_DEVICES=all \
@@ -20,7 +19,7 @@ WORKDIR /opt/app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl wget gnupg unzip \
-    git git-lfs vim nano tmux htop nvtop procps \
+    git git-lfs vim nano tmux htop procps \
     build-essential pkg-config cmake ninja-build \
     openssh-server openssh-client iproute2 net-tools rsync \
     less tree jq lsof psmisc \
@@ -54,20 +53,11 @@ COPY README.md /opt/app/README.md
 RUN uv python install 3.13 \
     && uv venv /opt/app/.venv --python 3.13 \
     && uv sync --no-install-project --python 3.13 \
-    && python - <<'PY'
-import sys
-print("python:", sys.version)
+    && python -c "import sys; print('python:', sys.version)"
 
-import torch
-print("torch:", torch.__version__)
-print("torch cuda:", torch.version.cuda)
-
-import jax
-print("jax:", jax.__version__)
-
-import numpyro
-print("numpyro:", numpyro.__version__)
-PY
+# Set CUDA/JAX runtime preference only after build-time dependency install.
+# GitHub Actions runners do not have NVIDIA GPUs, so do not import JAX with JAX_PLATFORMS=cuda during build.
+ENV JAX_PLATFORMS=cuda
 
 COPY start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
