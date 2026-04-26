@@ -18,7 +18,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 WORKDIR /opt/app
 
-# Base packages + SSH + dev tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl wget gnupg unzip \
     git git-lfs vim nano tmux htop nvtop procps \
@@ -33,7 +32,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && sed -i 's/^#\?PermitRootLogin .*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config \
     && git config --global --add safe.directory '*'
 
-# Node 22 for Codex CLI / Claude tooling
 RUN mkdir -p /etc/apt/keyrings \
     && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
       | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
@@ -43,20 +41,17 @@ RUN mkdir -p /etc/apt/keyrings \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="/usr/local/bin" sh
 
-# Claude Code + Codex CLI
 RUN curl -fsSL https://claude.ai/install.sh | bash || true
 RUN npm install -g @openai/codex
 
 ENV PATH="/opt/app/.venv/bin:/usr/local/bin:/root/.local/bin:/root/.claude/local:${PATH}"
 
-# Install Python 3.13 project deps from pyproject.toml.
-# This intentionally matches amort_debug: torch>=2.10 + numpyro[cuda13].
 COPY pyproject.toml /opt/app/pyproject.toml
-RUN touch /opt/app/README.md \
-    && uv python install 3.13 \
+COPY README.md /opt/app/README.md
+
+RUN uv python install 3.13 \
     && uv venv /opt/app/.venv --python 3.13 \
     && uv sync --no-install-project --python 3.13 \
     && python - <<'PY'

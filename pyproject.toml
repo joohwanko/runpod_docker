@@ -1,7 +1,7 @@
 [project]
 name = "runpod_exp"
 version = "0.1.0"
-description = "RunPod CUDA13/Python3.13 environment for amort_debug"
+description = "RunPod CUDA13 Python 3.13 environment for amort_debug"
 readme = "README.md"
 requires-python = ">=3.13"
 
